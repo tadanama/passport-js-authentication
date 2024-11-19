@@ -1,7 +1,19 @@
 import express from "express";
+import session from "express-session";
 
 const app = express();
 const port = 3000;
+
+app.use(
+	session({
+		secret: "secret",
+		saveUninitialized: false,
+		resave: false,
+		cookie: {
+			maxAge: 1000 * 60 * 60 * 24,
+		},
+	})
+);
 
 // Render the homepage
 app.get("/", (req, res) => {
