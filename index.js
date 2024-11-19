@@ -6,6 +6,7 @@ import { Strategy } from "passport-local";
 const app = express();
 const port = 3000;
 
+// Set express-session as the middleware
 app.use(
 	session({
 		secret: "secret",
@@ -17,7 +18,11 @@ app.use(
 	})
 );
 
+// Initialize passport
 app.use(passport.initialize());
+
+// Middleware below will restore login state from session
+// If credentials are valid then a session is established and middleware will populate req.user containing user info
 app.use(passport.session());
 
 // Render the homepage
