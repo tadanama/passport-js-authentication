@@ -1,5 +1,7 @@
 import express from "express";
 import session from "express-session";
+import passport from "passport";
+import { Strategy } from "passport-local";
 
 const app = express();
 const port = 3000;
@@ -14,6 +16,9 @@ app.use(
 		},
 	})
 );
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Render the homepage
 app.get("/", (req, res) => {
