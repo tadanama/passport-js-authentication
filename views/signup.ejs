@@ -18,5 +18,9 @@
 
         <button type="submit">Sign up</button>
     </form>
+    <!-- Display error if there is any -->
+    <% if (locals.error) { %>
+        <p><%= error %></p>
+    <% } %>
 </body>
 </html>

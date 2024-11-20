@@ -64,7 +64,9 @@ app.get("/userpage", (req, res) => {
 // Handle user sign up (registration)
 app.post("/signup", (req, res) => {
 	const {body: {username, password, confirmPassword}} = req;
-	console.log(username, password, confirmPassword);
+	
+	// Return error if password don't match
+	if (password !== confirmPassword) return res.status(400).render("signup.ejs", { error: "Password don't match"});
 })
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
