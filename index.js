@@ -2,14 +2,18 @@ import express from "express";
 import session from "express-session";
 import passport from "passport";
 import { Strategy } from "passport-local";
+import env from "dotenv";
 
 const app = express();
 const port = 3000;
 
+// Allow the use of environment variables
+env.config();
+
 // Set express-session as the middleware
 app.use(
 	session({
-		secret: "secret",
+		secret: process.env.SESSION_SECRET,
 		saveUninitialized: false,
 		resave: false,
 		cookie: {
