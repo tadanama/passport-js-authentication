@@ -3,12 +3,20 @@ import session from "express-session";
 import passport from "passport";
 import { Strategy } from "passport-local";
 import env from "dotenv";
+import connectPgSimple from "connect-pg-simple";
 
 const app = express();
 const port = 3000;
 
 // Allow the use of environment variables
 env.config();
+
+// Setting up connection to use postgres as the session store
+// Session is stored inside session table in passport js database
+const PostgresSessionStore = connectPgSimple(session);
+const sessionStore = new PostgresSessionStore({
+	conString: "postgres://postgres:12345@localhost:5432/passportjs"
+})
 
 // Set express-session as the middleware
 app.use(
@@ -19,6 +27,7 @@ app.use(
 		cookie: {
 			maxAge: 1000 * 60 * 60 * 24,
 		},
+		store: sessionStore
 	})
 );
 
