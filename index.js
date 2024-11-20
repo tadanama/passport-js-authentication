@@ -18,6 +18,9 @@ const sessionStore = new PostgresSessionStore({
 	conString: "postgres://postgres:12345@localhost:5432/passportjs"
 })
 
+// Enable body parser. To read the data sent from the client form (urlencoded)
+app.use(express.urlencoded({ extended: false}))
+
 // Set express-session as the middleware
 app.use(
 	session({
@@ -57,5 +60,11 @@ app.get("/signup", (req, res) => {
 app.get("/userpage", (req, res) => {
 	res.render("userpage.ejs");
 });
+
+// Handle user sign up (registration)
+app.post("/signup", (req, res) => {
+	const {body: {username, password, confirmPassword}} = req;
+	console.log(username, password, confirmPassword);
+})
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
