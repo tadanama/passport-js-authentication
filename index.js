@@ -4,6 +4,7 @@ import passport from "passport";
 import { Strategy } from "passport-local";
 import env from "dotenv";
 import connectPgSimple from "connect-pg-simple";
+import bcrypt from "bcrypt";
 
 const app = express();
 const port = 3000;
@@ -15,11 +16,11 @@ env.config();
 // Session is stored inside session table in passport js database
 const PostgresSessionStore = connectPgSimple(session);
 const sessionStore = new PostgresSessionStore({
-	conString: "postgres://postgres:12345@localhost:5432/passportjs"
-})
+	conString: "postgres://postgres:12345@localhost:5432/passportjs",
+});
 
 // Enable body parser. To read the data sent from the client form (urlencoded)
-app.use(express.urlencoded({ extended: false}))
+app.use(express.urlencoded({ extended: false }));
 
 // Set express-session as the middleware
 app.use(
@@ -30,7 +31,7 @@ app.use(
 		cookie: {
 			maxAge: 1000 * 60 * 60 * 24,
 		},
-		store: sessionStore
+		store: sessionStore,
 	})
 );
 
@@ -63,10 +64,25 @@ app.get("/userpage", (req, res) => {
 
 // Handle user sign up (registration)
 app.post("/signup", (req, res) => {
-	const {body: {username, password, confirmPassword}} = req;
-	
+	const {
+		body: { username, password, confirmPassword },
+	} = req;
+
 	// Return error if password don't match
-	if (password !== confirmPassword) return res.status(400).render("signup.ejs", { error: "Password don't match"});
-})
+	if (password !== confirmPassword)
+		return res
+			.status(400)
+			.render("signup.ejs", { error: "Password don't match" });
+
+	// Hash the password
+	bcrypt.hash(password, 15, (error, hashedPassword) => {
+		if (error) {
+			console.error("Error whan hashing password:", error);
+			return res
+				.status(500)
+				.render("signup.ejs", { error: "Server cannot hash password" });
+		}
+	});
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
