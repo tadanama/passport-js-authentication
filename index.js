@@ -122,7 +122,7 @@ app.post("/signup", (req, res) => {
 });
 
 // Serialilze the user (executed one time when loggin or signing up)
-// Session object is modified, session is established, browser gets a cookie with the with the session
+// Session object is modified, session is established, browser gets a cookie with the with the session id
 // Session id is stored in the session store (postgres in this case) with the user information
 passport.serializeUser((user, done) => {
 	// User info below is what we got from req.login
@@ -132,6 +132,37 @@ passport.serializeUser((user, done) => {
 	// At this point is when the session object is modified
 	// Passport modifies the session object for us containing the id (second argument of the done function)
 	done(null, user.id);
+});
+
+// Deserialize the user (executed right after serializing the user and for subsequent request after loggin or signing up)
+// User sends request to the browser with the cookie that contains the session id
+// User info is retrieved from the session store that is associated with that session id
+// Search the database if the user exists
+// Attaches it to the req.user body
+passport.deserializeUser(async (id, done) => {
+	// Consoling the user info that is stored in the session store
+	console.log("Inside deserialize user", id);
+
+	try {
+		// Querying the database to check if the user info from the session store exist in the database
+		const foundUser = await db.query(
+			"SELECT id, username FROM users WHERE id = $1",
+			[id]
+		);
+
+		// Return error if the user info (id in this case) from session store does not exist database
+		if (foundUser.rows === 0) {
+			return done("No user with such id", null);
+		}
+
+		// Attach the user info from database to the req.user with the done callback
+		const user = foundUser.rows[0];
+		done(null, user);
+	} catch (error) {
+		// Return error if unable to query database
+		console.error("Error when retrieving user info:", error);
+		done("Error when querying database: " + error, null);
+	}
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
