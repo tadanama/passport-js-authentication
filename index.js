@@ -5,6 +5,8 @@ import { Strategy } from "passport-local";
 import env from "dotenv";
 import connectPgSimple from "connect-pg-simple";
 import bcrypt from "bcrypt";
+import db from "./db.js";
+import { v4 as uuidv4 } from "uuid";
 
 const app = express();
 const port = 3000;
@@ -75,12 +77,33 @@ app.post("/signup", (req, res) => {
 			.render("signup.ejs", { error: "Password don't match" });
 
 	// Hash the password
-	bcrypt.hash(password, 15, (error, hashedPassword) => {
+	bcrypt.hash(password, 15, async (error, hashedPassword) => {
 		if (error) {
 			console.error("Error whan hashing password:", error);
 			return res
 				.status(500)
 				.render("signup.ejs", { error: "Server cannot hash password" });
+		}
+
+		//? We can also query the database to check if there is a user with the same username or email and prompt the user to use a different username or email before executing the try catch block below
+		try {
+			// Generate a new user id
+			const newUserID = uuidv4();
+
+			// Insert the new user to the database alon with the credentials
+			// Upon successful insertion return the id and username of the newly inserted user data
+			const newUser = await db.query(
+				"INSERT INTO users VALUES ($1, $2, $3) RETURNING id, username",
+				[newUserID, username, hashedPassword]
+			);
+			console.log(newUser.rows[0]);
+
+			// Error spelling is different to differentiate from the error above
+		} catch (err) {
+			console.error("Error when inserting new user to database:", err);
+			return res.status(500).render("signup.ejs", {
+				error: "Server cannot insert new user into database",
+			});
 		}
 	});
 });
