@@ -97,6 +97,19 @@ app.post("/signup", (req, res) => {
 				[newUserID, username, hashedPassword]
 			);
 			console.log(newUser.rows[0]);
+			const user = newUser.rows[0];
+
+			// Send data of the newly inserted user to the serializeUser function
+			req.logIn(user, (error) => {
+				if (error) {
+					console.error("Error when intiating a session:", error);
+					return res.status(500).render("/signup", {
+						error: "Passport unable to establish a session",
+					});
+				}
+
+				return res.status(200).redirect("/userpage");
+			});
 
 			// Error spelling is different to differentiate from the error above
 		} catch (err) {
