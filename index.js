@@ -121,4 +121,17 @@ app.post("/signup", (req, res) => {
 	});
 });
 
+// Serialilze the user (executed one time when loggin or signing up)
+// Session object is modified, session is established, browser gets a cookie with the with the session
+// Session id is stored in the session store (postgres in this case) with the user information
+passport.serializeUser((user, done) => {
+	// User info below is what we got from req.login
+	// User object below contains id and username (in this case)
+	console.log("Inside serialize user", user);
+
+	// At this point is when the session object is modified
+	// Passport modifies the session object for us containing the id (second argument of the done function)
+	done(null, user.id);
+});
+
 app.listen(port, () => console.log(`Listening on port ${port}`));
