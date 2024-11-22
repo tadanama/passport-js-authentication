@@ -44,6 +44,13 @@ app.use(passport.initialize());
 // If credentials are valid then a session is established and middleware will populate req.user containing user info
 app.use(passport.session());
 
+// Set the local variable to display error message if any
+app.use((req, res, next) => {
+	res.locals.error = req.session.messages;
+	req.session.messages = [];	// Set the error message back to an empty array. An array of error messages will be saved when multiple error happens if it is not emptied
+	next();
+});
+
 // Render the homepage
 app.get("/", (req, res) => {
 	res.render("homepage.ejs");
