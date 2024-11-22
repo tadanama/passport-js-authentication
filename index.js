@@ -64,6 +64,17 @@ app.get("/userpage", (req, res) => {
 	res.render("userpage.ejs");
 });
 
+// User login route
+// Redirect to /userpage if login success or /login page if login failure
+app.post(
+	"/login",
+	passport.authenticate("local", {
+		successRedirect: "/userpage",
+		failureRedirect: "/login",
+		failureMessage: true, // failure message stored in the session store
+	})
+);
+
 // Handle user sign up (registration)
 app.post("/signup", (req, res) => {
 	const {
