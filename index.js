@@ -132,6 +132,52 @@ app.post("/signup", (req, res) => {
 	});
 });
 
+// Passport middleware to authenticate user when they log in
+// Passport automatically takes the username and password field and provide it as an argument in the verify function
+// Assuming the field name is for username and password is "username" and "password"
+// Otherwise we need to provide the options for the strategy (usernameField, passwordField) (put as first argument inside Strategy object right before the verify function)
+passport.use(
+	"local",
+	new Strategy(async function verify(username, password, done) {
+		// Query the database to see if the user exist
+		const user = await db.query("SELECT * FROM users WHERE username = $1", [
+			username,
+		]);
+		const userData = user.rows[0];
+		console.log(userData);
+
+		// Return error if user don't exist
+		if (!userData) {
+			// Provide an error message if credentials are not valid. The messages are available through req.session.messages and is part of session data that is stored in session store. Meaning session was established (mainly for attaching error message to the currently unauthenticated user). When the user finally logs in with valid credentials, this session is destroyed.
+			// The name of the property must be "message" or otherwise it won't work
+			return done(null, false, {
+				message: `User with username ${username} don't exist in database`,
+			});
+		}
+
+		// Compare the passwords
+		bcrypt.compare(
+			password,
+			userData.password_hash,
+			(err, doesPasswordMatch) => {
+				// Redirect to the login page if bcrypt can't compare the passwords
+				if (err) {
+					console.log("Error when comparing passwords:", err);
+					return res.status(500).render("/login");
+				}
+
+				if (!doesPasswordMatch) {
+					// Return error if password don't match
+					return done(null, false, { message: "Invalid password" });
+				} else {
+					// Establish a session with the user info (store to session store)
+					return done(null, { id: userData.id, username: userData.username });
+				}
+			}
+		);
+	})
+);
+
 // Serialilze the user (executed one time when loggin or signing up)
 // Session object is modified, session is established, browser gets a cookie with the with the session id
 // Session id is stored in the session store (postgres in this case) with the user information
