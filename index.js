@@ -52,17 +52,17 @@ app.use((req, res, next) => {
 });
 
 // Render the homepage
-app.get("/", (req, res) => {
+app.get("/", byPassPage, (req, res) => {
 	res.render("homepage.ejs");
 });
 
 // Render the login page
-app.get("/login", (req, res) => {
+app.get("/login", byPassPage, (req, res) => {
 	res.render("login.ejs");
 });
 
 // Render the sign up page
-app.get("/signup", (req, res) => {
+app.get("/signup", byPassPage, (req, res) => {
 	res.render("signup.ejs");
 });
 
@@ -249,6 +249,19 @@ function checkLogin(req, res, next) {
 		console.log("You are not authenticated");
 		console.log(req.isAuthenticated());
 		res.redirect("/");
+	}
+}
+
+// Middleware to bypass and prevent authenticated user from accessing the homepage, login page and signup page
+function byPassPage(req, res, next) {
+	// Proceed if user is not authenticated
+	if (!req.isAuthenticated()) {
+		next();
+	} else {
+		// Redirect authenticated user to userpage
+		console.log("You already logged in");
+		console.log(req.isAuthenticated());
+		res.redirect("/userpage");
 	}
 }
 
