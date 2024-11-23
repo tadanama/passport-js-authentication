@@ -47,7 +47,7 @@ app.use(passport.session());
 // Set the local variable to display error message if any
 app.use((req, res, next) => {
 	res.locals.error = req.session.messages;
-	req.session.messages = [];	// Set the error message back to an empty array. An array of error messages will be saved when multiple error happens if it is not emptied
+	req.session.messages = []; // Set the error message back to an empty array. An array of error messages will be saved when multiple error happens if it is not emptied
 	next();
 });
 
@@ -69,6 +69,17 @@ app.get("/signup", (req, res) => {
 // Render the user page
 app.get("/userpage", (req, res) => {
 	res.render("userpage.ejs");
+});
+
+// Logout route
+// Destroy the existing session
+app.get("/logout", (req, res, next) => {
+	console.log("logging out in GET request");
+	req.logOut((error) => {
+		if (error) return next(error);
+
+		res.redirect("/");
+	});
 });
 
 // User login route
