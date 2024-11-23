@@ -67,14 +67,13 @@ app.get("/signup", (req, res) => {
 });
 
 // Render the user page
-app.get("/userpage", (req, res) => {
+app.get("/userpage", checkLogin, (req, res) => {
 	res.render("userpage.ejs");
 });
 
 // Logout route
 // Destroy the existing session
 app.get("/logout", (req, res, next) => {
-	console.log("logging out in GET request");
 	req.logOut((error) => {
 		if (error) return next(error);
 
@@ -239,5 +238,18 @@ passport.deserializeUser(async (id, done) => {
 		done("Error when querying database: " + error, null);
 	}
 });
+
+// Middlware below is used when rendering the user page
+function checkLogin(req, res, next) {
+	// Check if a user is logged in
+	if (req.isAuthenticated()) {
+		next();
+	} else {
+		// Redirect unauthenticated user back to login page
+		console.log("You are not authenticated");
+		console.log(req.isAuthenticated());
+		res.redirect("/");
+	}
+}
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
