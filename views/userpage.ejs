@@ -6,7 +6,13 @@
 		<title>User Page</title>
 	</head>
 	<body>
-		<h1>Welcome user</h1>
+		<h1>Welcome 
+			<% if (locals.username) { %>
+				<%= username %>
+			<% } else { %>
+				user
+			<% } %>
+		</h1>
 		<a href="/logout">Logout</a>
 	</body>
 </html>
