@@ -161,7 +161,7 @@ passport.use(
 			username,
 		]);
 		const userData = user.rows[0];
-		console.log(userData);
+		// console.log(userData);
 
 		// Return error if user don't exist
 		if (!userData) {
@@ -241,8 +241,10 @@ passport.deserializeUser(async (id, done) => {
 
 // Middlware below is used when rendering the user page
 function checkLogin(req, res, next) {
-	// Check if a user is logged in
+	// Check if a user is logged in. Proceed to render user page if true
 	if (req.isAuthenticated()) {
+		// Set the username local variable to display the username when rendering userpage
+		res.locals.username = req.user.username;
 		next();
 	} else {
 		// Redirect unauthenticated user back to login page
